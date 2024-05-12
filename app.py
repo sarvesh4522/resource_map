@@ -6,13 +6,12 @@ app = Flask(__name__)
 # Read data from Excel file
 excel_file = 'DM_Resource_Plot.xlsx'
 df = pd.read_excel(excel_file)
-df = df.drop(columns=['Unnamed: 0'])
 excel_file = 'DM_learner_plot.xlsx'
 df_learner = pd.read_excel(excel_file)
 df_learner = df_learner.drop(columns=['Unnamed: 0'])
 
 # Assuming your Excel file has columns 'x', 'y', and 'video_url'
-scatterplot_data = df[['name', 'x', 'y', 'video_url']].to_dict(orient='records')
+scatterplot_data = df[['index', 'name', 'x', 'y', 'video_url']].to_dict(orient='records')
 learner_data = df_learner[['x', 'y', 'description']].to_dict(orient='records')
 
 @app.route('/')
