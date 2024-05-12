@@ -17,7 +17,7 @@ learner_data = df_learner[['x', 'y', 'description']].to_dict(orient='records')
 
 @app.route('/')
 def index():
-    return send_from_directory('.','index.html')
+    return send_from_directory('.','index2.html')
 
 @app.route('/data')
 def get_data():
