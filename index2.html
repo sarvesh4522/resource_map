@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scatterplot with video Links</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+<style>
+    /* CSS for layout */
+    
+    .container-wrapper {
+        display: flex;
+        flex-wrap: wrap;
+    }
+    
+    .container {
+        flex: 1;
+        margin: 10px;
+        padding: 10px;
+        border: 1px solid #ccc;
+    }
+    
+    .container:nth-child(3) {
+        flex-basis: 100%;
+    }
+</style>
+
+<body>
+    <h2> Learning Map(Discrete Mathematics)</h2>
+    <div class="container-wrapper"></div>
+    <div id="scatterplot-container" class="container"></div>
+    <div id="milestone-container" class="container"></div>
+    <script>
+        let buttonClickCount = 0;
+        // Fetch data from Flask route
+        fetch('/data')
+            .then(response => response.json())
+            .then(data => {
+                // Create scatterplot using D3.js
+                const svg = d3.select('#scatterplot-container')
+                    .append('svg')
+                    .attr('width', 1000)
+                    .attr('height', 1000);
+
+                // border    
+                svg.append('rect')
+                    .attr('x', 0)
+                    .attr('y', 0)
+                    .attr('width', 1000) // Same as SVG width
+                    .attr('height', 1000) // Same as SVG height
+                    .attr('fill', 'none')
+                    .attr('stroke', 'black')
+                    .attr('stroke-width', 2);
+                // Bind data to circles
+                const circles = svg.selectAll('circle')
+                    .data(data)
+                    .enter()
+                    .append('a') // Make each point a link
+                    .attr('xlink:href', d => d.video_url)
+                    .attr('target', '_blank')
+                    .append('circle')
+                    //.attr('cx', d => d.x * 3000 - 1000)
+                    //.attr('cy', d => d.y * 4000 - 1000)
+                    .attr('cx', d => d.x * 8000 - 2800) //d.x * 1000)
+                    .attr('cy', d => 3650 - d.y * 8000) //1000 - d.y * 1000)
+                    .attr('r', 5)
+                    .attr('fill', 'steelblue')
+                    .on('click', function() {
+                        // Change color of clicked circle
+                        d3.select(this)
+                            .attr('fill', 'orange');
+                        let numMilestonesToShow = Math.min(milestones.length, buttonClickCount + 1);
+
+                        // Update milestone positions sequentially
+                        for (let i = 0; i < numMilestonesToShow; i++) {
+                            updateMilestone(i);
+                        }
+
+                        // Increment the button click count
+                        buttonClickCount++;
+                    })
+                    .on('mouseover', function(event, d) {
+                        // Display name of the data point
+                        svg.append('text')
+                            .attr('x', d3.select(this).attr('cx')) // Position text relative to the circle
+                            .attr('y', d3.select(this).attr('cy') - 10) // Adjust the position of the text slightly above the circle
+                            .text(d.name)
+                            .attr('fill', 'black')
+                            .attr('font-size', '12px')
+                            .attr('font-family', 'sans-serif')
+                            .attr('id', 'name-label');
+                    })
+                    .on('mouseout', function(event, d) {
+                        // Remove the name label when mouse moves out
+                        svg.selectAll('text').remove();
+                    });
+
+                const texts = svg.selectAll('text')
+                    .data(data)
+                    .enter()
+                    .append('text')
+                    .attr('x', d => d.x * 8000 - 2800 + 10) // Adjust x-coordinate to position text beside the circle
+                    .attr('y', d => 3650 - d.y * 8000) // Adjust y-coordinate if needed
+                    .text(d => d.index)
+                    .attr('fill', 'black')
+                    .attr('font-size', '12px')
+                    .attr('font-family', 'sans-serif');
+
+
+                const milestones = [{
+                        name: "Resource 1",
+                        xOffset: 250,
+                        yOffset: 900
+                    }, // Example offset relative to the individual point
+                    {
+                        name: "Resource 11",
+                        xOffset: 250,
+                        yOffset: 850
+                    }, {
+                        name: "Resource 21",
+                        xOffset: 250,
+                        yOffset: 800
+                    }, {
+                        name: "Resource 31",
+                        xOffset: 250,
+                        yOffset: 750
+                    }
+                    // Add more milestones as needed
+                ];
+
+                // function updateMilestonePositions(newPosition) {
+                //     const updatedMilestones = milestones.map(milestone => ({
+                //         name: milestone.name,
+                //         x: milestone.xOffset, // Calculate x-coordinate relative to the individual point
+                //         y: 1000 - milestone.yOffset, // Calculate y-coordinate relative to the individual point
+                //     }));
+                //     return updatedMilestones;
+                // }
+
+                const milestoneSVG = d3.select('#milestone-container')
+                    .append('svg')
+                    .attr('width', 500) // Adjust width as needed
+                    .attr('height', 1000); // Adjust height as needed
+
+                milestonesvg.append('rect')
+                    .attr('x', 0)
+                    .attr('y', 0)
+                    .attr('width', 500) // Same as SVG width
+                    .attr('height', 1000) // Same as SVG height
+                    .attr('fill', 'none')
+                    .attr('stroke', 'black')
+                    .attr('stroke-width', 2);
+
+                function updateMilestone(milestoneIndex) {
+                    if (milestoneIndex >= 0 && milestoneIndex < milestones.length) {
+                        const milestone = milestones[milestoneIndex];
+                        const updatedX = milestone.xOffset;
+                        const updatedY = 1000 - milestone.yOffset;
+
+                        milestoneSVG.append('circle')
+                            .attr('class', 'milestone')
+                            .attr('cx', updatedX)
+                            .attr('cy', updatedY)
+                            .attr('r', 20)
+                            .attr('fill', 'green');
+
+                        milestoneSVG.append('text')
+                            .attr('class', 'milestone-label')
+                            .attr('x', updatedX)
+                            .attr('y', updatedY - 20)
+                            .text(milestone.name)
+                            .attr('font-size', '16px')
+                            .attr('font-family', 'sans-serif')
+                            .attr('fill', 'black')
+                            .attr('text-anchor', 'middle');
+                    }
+                }
+            })
+            .catch(error => console.error('Error fetching data:', error));
+    </script>
+</body>
+
+</html>
