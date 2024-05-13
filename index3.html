@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scatterplot with video Links</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+<style>
+    /* CSS for layout */
+    
+    .container-wrapper {
+        display: flex;
+        flex-wrap: wrap;
+    }
+    
+    .container {
+        flex: 1;
+        margin: 10px;
+        padding: 10px;
+        border: 1px solid #ccc;
+    }
+    
+    .container:nth-child(3) {
+        flex-basis: 100%;
+    }
+</style>
+
+<body>
+    <h2> Learning Map(Discrete Mathematics)</h2>
+    <div class="container-wrapper">
+        <div id="scatterplot-container" class="container"></div>
+        <div id="milestone-container" class="container"></div>
+        <div id="description-container" class="container"></div>
+    </div>
+    <h3><button id="update-button">Update Point Position</button></h3>
+    <script>
+        // Fetch data from Flask route
+        fetch('/data')
+            .then(response => response.json())
+            .then(data => {
+                // Create scatterplot using D3.js
+                const svg = d3.select('#scatterplot-container')
+                    .append('svg')
+                    .attr('width', 1000)
+                    .attr('height', 1000);
+
+                // border    
+                svg.append('rect')
+                    .attr('x', 0)
+                    .attr('y', 0)
+                    .attr('width', 1000) // Same as SVG width
+                    .attr('height', 1000) // Same as SVG height
+                    .attr('fill', 'none')
+                    .attr('stroke', 'black')
+                    .attr('stroke-width', 2);
+                // Bind data to circles
+                const circles = svg.selectAll('circle')
+                    .data(data)
+                    .enter()
+                    .append('a') // Make each point a link
+                    .attr('xlink:href', d => d.video_url)
+                    .attr('target', '_blank')
+                    .append('circle')
+                    //.attr('cx', d => d.x * 3000 - 1000)
+                    //.attr('cy', d => d.y * 4000 - 1000)
+                    .attr('cx', d => d.x * 8000 - 2800) //d.x * 1000)
+                    .attr('cy', d => 3650 - d.y * 8000) //1000 - d.y * 1000)
+                    .attr('r', 5)
+                    .attr('fill', 'steelblue')
+                    .on('click', function() {
+                        // Change color of clicked circle
+                        d3.select(this)
+                            .attr('fill', 'orange');
+                        update_resource_Milestone(d3.select(this).name);
+                    })
+                    .on('mouseover', function(event, d) {
+                        // Display name of the data point
+                        svg.append('text')
+                            .attr('x', d3.select(this).attr('cx')) // Position text relative to the circle
+                            .attr('y', d3.select(this).attr('cy') - 10) // Adjust the position of the text slightly above the circle
+                            .text(d.name)
+                            .attr('fill', 'black')
+                            .attr('font-size', '12px')
+                            .attr('font-family', 'sans-serif')
+                            .attr('id', 'name-label');
+                    })
+                    .on('mouseout', function(event, d) {
+                        // Remove the name label when mouse moves out
+                        svg.selectAll('text').remove();
+                    });
+
+                svg.append('circle')
+                    .attr('cx', 100) // Adjust x-coordinate
+                    .attr('cy', 900)
+                    .attr('r', 5)
+                    .attr('fill', 'red')
+                    .attr('id', 'individual-point')
+
+                .on('mouseover', function(event, d) {
+                        svg.append('text')
+                            .attr('x', d3.select(this).attr('x'))
+                            .attr('y', d3.select(this).attr('y') - 10)
+                            .text('Learner') // Set text content to "Learner"
+                            .attr('fill', 'black')
+                            .attr('font-size', '12px')
+                            .attr('font-family', 'sans-serif')
+                            .attr('id', 'learner-label');
+                    })
+                    .on('mouseout', function(event, d) {
+                        // Remove the name label when mouse moves out
+                        svg.selectAll('text').remove();
+                    });
+
+                const texts = svg.selectAll('text')
+                    .data(data)
+                    .enter()
+                    .append('text')
+                    .attr('x', d => d.x * 8000 - 2800 + 10) // Adjust x-coordinate to position text beside the circle
+                    .attr('y', d => 3650 - d.y * 8000) // Adjust y-coordinate if needed
+                    .text(d => d.index)
+                    .attr('fill', 'black')
+                    .attr('font-size', '12px')
+                    .attr('font-family', 'sans-serif');
+
+
+                const milestone = {
+                    name: "Resource 1",
+                    xOffset: 250,
+                    yOffset: 900
+                };
+
+                const milestoneSVG = d3.select('#milestone-container')
+                    .append('svg')
+                    .attr('width', 500) // Adjust width as needed
+                    .attr('height', 1000); // Adjust height as needed
+
+                milestoneSVG.append('rect')
+                    .attr('x', 0)
+                    .attr('y', 0)
+                    .attr('width', 500) // Same as SVG width
+                    .attr('height', 1000) // Same as SVG height
+                    .attr('fill', 'none')
+                    .attr('stroke', 'black')
+                    .attr('stroke-width', 2);
+
+                function update_resource_Milestone(reso_name) {
+                    const updatedX = milestone.xOffset;
+                    const updatedY = 1000 - milestone.yOffset;
+
+                    milestoneSVG.append('circle')
+                        .attr('class', 'milestone')
+                        .attr('cx', updatedX)
+                        .attr('cy', updatedY)
+                        .attr('r', 20)
+                        .attr('fill', 'green');
+
+                    milestoneSVG.append('text')
+                        .attr('class', 'milestone-label')
+                        .attr('x', updatedX)
+                        .attr('y', updatedY - 20)
+                        .text(reso_name)
+                        .attr('font-size', '16px')
+                        .attr('font-family', 'sans-serif')
+                        .attr('fill', 'black')
+                        .attr('text-anchor', 'middle');
+
+                    milestone.yOffset = milestone.yOffset - 60
+                }
+
+                function update_summary_Milestone(i) {
+                    const updatedX = milestone.xOffset;
+                    const updatedY = 1000 - milestone.yOffset;
+
+                    milestoneSVG.append('rect')
+                        .attr('class', 'milestone')
+                        .attr('x', updatedX - 20)
+                        .attr('y', updatedY - 20)
+                        .attr('width', 40) // Same as SVG width
+                        .attr('height', 40) // Same as SVG height
+                        .attr('fill', 'green')
+                        .attr('stroke', 'black')
+                        .attr('stroke-width', 2);
+
+                    milestoneSVG.append('text')
+                        .attr('class', 'milestone-label')
+                        .attr('x', updatedX + 70)
+                        .attr('y', updatedY)
+                        .text('Summary' + " " + i)
+                        .attr('font-size', '18px')
+                        .attr('font-family', 'sans-serif')
+                        .attr('fill', 'black')
+                        .attr('text-anchor', 'middle');
+
+                    milestone.yOffset = milestone.yOffset - 60
+                }
+
+
+                let currentPositionIndex = 0;
+                let buttonClickCount = 0;
+                const descriptionSvg = d3.select('#description-container')
+                    .append('svg')
+                    .attr('width', 2000) // Adjust width as needed
+                    .attr('height', 200) // Adjust height as needed
+                    .style('position', 'absolute') // Position the SVG element
+                    .style('left', '200px') // Adjust left position as needed
+                    .style('bottom', '10px');
+                descriptionSvg.append('rect')
+                    .attr('x', 0)
+                    .attr('y', 0)
+                    .attr('width', 2000) // Same as SVG width
+                    .attr('height', 200) // Same as SVG height
+                    .attr('fill', 'none')
+                    .attr('stroke', 'black')
+                    .attr('stroke-width', 2);
+                const descriptionText = descriptionSvg.append('text')
+                    .attr('x', 100) // Adjust the x position as needed
+                    .attr('y', 100) // Adjust the y position as needed
+                    .attr('fill', 'black')
+                    .attr('font-size', '16px')
+                    .attr('font-family', 'sans-serif')
+                    .attr('id', 'description-label');
+
+                document.getElementById('update-button').addEventListener('click', function() { //window.updatePosition = function() {
+                    // Fetch data for new positions from another route
+                    fetch('/new_positions')
+                        .then(response => response.json())
+                        .then(newPositions => {
+                            // Update position of individual point based on the new data
+                            svg.select('#individual-point')
+                                .attr('cx', newPositions[currentPositionIndex].x * 1000)
+                                .attr('cy', 1000 - newPositions[currentPositionIndex].y * 1000);
+                            descriptionText.text(newPositions[currentPositionIndex].description);
+                            currentPositionIndex = (currentPositionIndex + 1) % newPositions.length;
+                            //updateMilestone(newPositions)
+                            update_summary_Milestone(buttonClickCount)
+                                // Increment the button click count
+                            buttonClickCount++;
+                        });
+                });
+            })
+            .catch(error => console.error('Error fetching data:', error));
+    </script>
+</body>
+
+</html>
