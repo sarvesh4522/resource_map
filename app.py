@@ -1,4 +1,4 @@
-from flask import Flask, render_template, jsonify
+from flask import Flask, render_template, jsonify, send_from_directory
 import pandas as pd
 
 app = Flask(__name__)
@@ -15,7 +15,7 @@ learner_data = df_learner[['index', 'resource_name', 'x', 'y', 'description']].t
 
 @app.route('/')
 def index():
-    return render_template('index3.html')
+    return send_from_directory('.','index3.html')
 
 @app.route('/data')
 def get_data():
