@@ -73,7 +73,7 @@
                         // Change color of clicked circle
                         d3.select(this)
                             .attr('fill', 'orange');
-                        update_resource_Milestone(d3.select(this).name);
+                        update_resource_Milestone(d3.select(this).datum().name);
                     })
                     .on('mouseover', function(event, d) {
                         // Display name of the data point
