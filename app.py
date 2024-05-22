@@ -15,7 +15,7 @@ learner_data = df_learner[['index', 'resource_name', 'x', 'y', 'description']].t
 
 @app.route('/')
 def index():
-    return send_from_directory('.','index3.html')
+    return send_from_directory('.','index4.html')
 
 @app.route('/data')
 def get_data():
